@@ -6,19 +6,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiUrl = process.env.BACKEND_API_URL ?? ''
   if (!apiUrl) return res.status(500).json({ error: 'BACKEND_API_URL not configured' })
 
-  let fileTree: string[] = []
-  try {
-    const treeRes = await fetch(`${apiUrl}/listRepoFiles`, { method: 'GET' })
-    if (treeRes.ok) {
-      const treeData = await treeRes.json() as { files: string[] }
-      fileTree = treeData.files
-    }
-  } catch { /* proceed without tree */ }
-
-  const upstream = await fetch(`${apiUrl}/codegenChat`, {
+  const upstream = await fetch(`${apiUrl}/pushToRepo`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...req.body, fileTree }),
+    body: JSON.stringify(req.body),
   })
 
   const data = await upstream.json()
